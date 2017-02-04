@@ -1,3 +1,11 @@
+@import "./styleguide";
+
 .appContainer {
 	width: 100%;
+	background: $background-color;
+	height: 100vh;
+}
+
+.mainContainer {
+
 }
