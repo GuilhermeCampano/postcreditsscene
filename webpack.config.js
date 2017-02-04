@@ -54,6 +54,7 @@ module.exports = {
 		loaders
 	},
 	devServer: {
+		headers: { "Access-Control-Allow-Origin": "*" },
 		contentBase: "./public",
 		// do not print bundle build stats
 		noInfo: true,
