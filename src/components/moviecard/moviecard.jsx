@@ -37,17 +37,17 @@ export default class MovieCard extends React.Component {
   render() {
     let self = this;
     let movies = this.state.data.map(function(movie) {
-      let poster;
-      if (!!movie.poster_path) {
-        poster = <img src={self.setMoviePoster(movie.poster_path)}/>
-      } else {
-        poster = '';
-      }
       return (
-        <div key={movie.id}>
-        <div><b>Title</b>: {movie.title}</div>
-        <div><b>Descripiton</b>: {movie.overview}</div>
-        {poster}
+        <div className="col s12 m6" key={movie.id}>
+          <div className="card medium">
+            <div className="card-image">
+              <img className={style.cardImage} src={self.setMoviePoster(movie.poster_path)}/>
+              <span className="card-title">{movie.title}</span>
+            </div>
+            <div className="card-content">
+              <p>{movie.overview}</p>
+            </div>
+          </div>
         </div>
       );
     });
@@ -61,7 +61,10 @@ export default class MovieCard extends React.Component {
           onChange={this.handleQueryChange}
           value={this.state.movieQuery}
         />
+        <div className="row">
         {movies}
+        </div>
+
       </div>
     )
   }
