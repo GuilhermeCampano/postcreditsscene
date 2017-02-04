@@ -1,7 +1,7 @@
 import React from 'react';
 import { render } from 'react-dom'
 import { Router, Route, Link, browserHistory } from 'react-router'
-import Navbar  from './templates/navbar/navbar.jsx';
+import Navbar  from './components/navbar/navbar.jsx';
 import Home from './pages/home/home.jsx';
 import About from './pages/about/about.jsx';
 import style from './app.scss'
