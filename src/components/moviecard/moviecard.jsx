@@ -1,37 +1,30 @@
 import React from 'react';
-import Axios from 'axios';
 import style  from './moviecard.scss';
+import MovieStore from '../../stores/MovieStore';
+import * as MovieActions from '../../actions/MovieActions';
 
 export default class MovieCard extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      data: [],
-      movieQuery: ''
+      data: MovieStore.getAll(),
+      searchValue: ''
     }
+  }
+  
+  componentWillMount () {
+    MovieStore.on('change', ()=>{
+      this.state({data:MovieStore.getAll()});
+    })
   }
 
   setMoviePoster = (endUrl) => {
     return 'http://image.tmdb.org/t/p/w185/'+endUrl;
   }
 
-  getMovies = () => {
-    let self = this;
-    // Axios.get('https://api.themoviedb.org/3/movie/'+this.state.movieQuery+'?api_key=10c95faa22afc9b0a480f4f77cd3a6d1')
-     Axios.get('https://api.themoviedb.org/3/search/movie/?api_key=10c95faa22afc9b0a480f4f77cd3a6d1&query='+this.state.movieQuery)
-    .then(function (response) {
-      self.setState({data:response.data.results});
-    })
-    .catch(function (error) {
-    });
-  }
-
-  handleQueryChange = (e) => {
-   this.setState({movieQuery: e.target.value});
-   this.getMovies();
-  }
-
-  componentDidMount= () => {
+  searchValueChange = (e) => {
+    this.setState({searchValue:e.target.value});
+    MovieActions.getMovies("bla");
   }
 
   render() {
@@ -58,8 +51,8 @@ export default class MovieCard extends React.Component {
           className = "movie-id-input"
           type="text"
           placeholder="busca"
-          onChange={this.handleQueryChange}
-          value={this.state.movieQuery}
+          onChange={this.searchValueChange}
+          value={this.searchValue}
         />
         <div className="row">
         {movies}
