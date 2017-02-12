@@ -8,13 +8,7 @@ class MovieStore extends EventEmitter {
   constructor() {
     super();
     this.self = this;
-    this.movies = [
-      {
-        id:1,
-        title:'title',
-        overview: 'overview'
-      }
-    ];
+    this.movies = [];
   }
 
   handleActions(action) {
