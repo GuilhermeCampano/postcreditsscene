@@ -20,14 +20,33 @@ export default class MovieCard extends React.Component {
       }
     })
   }
+  componentDidMount() {
+    $(document).ready(function() {
+      Materialize.updateTextFields();
+    });
+  }
 
   setMoviePoster = (endUrl) => {
     return !!endUrl ? 'http://image.tmdb.org/t/p/w185/'+endUrl : false;
   }
 
-  searchValueChange = (e) => {
+  handleSearchValueChange = (e) => {
     this.setState({searchValue:e.target.value});
-    MovieActions.getMovies(this.state.searchValue);
+  }
+
+  handleClickSearchButton = () =>{
+    this.executeSearch();
+  }
+
+  handleKeyPress = (e) => {
+    if (e.key === 'Enter') {
+      this.executeSearch();
+    }
+  }
+
+  executeSearch = () => {
+    let searchValue = this.state.searchValue.toUpperCase();
+    return MovieActions.getMovies(searchValue);
   }
 
   render() {
@@ -50,13 +69,22 @@ export default class MovieCard extends React.Component {
 
     return(
       <div>
-        <input
-          className = "movie-id-input"
-          type="text"
-          placeholder="busca"
-          onChange={this.searchValueChange}
-          value={this.searchValue}
-        />
+        <div className="input-field col s6">
+          <i className={"material-icons prefix "+ style.searchButton}
+            onClick= {this.handleClickSearchButton}
+          >search</i>
+          <input
+            id = "serch-movie"
+            className = "movie-id-input"
+            type="text"
+            placeholder="movie title"
+            onChange={this.handleSearchValueChange}
+            onKeyPress={this.handleKeyPress}
+            value={this.searchValue}
+          />
+          <label htmlFor="search-movie">Search movie by title</label>
+        </div>
+
         <div className="row">
         {movies}
         </div>
