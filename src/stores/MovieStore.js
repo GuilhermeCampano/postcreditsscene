@@ -22,7 +22,7 @@ class MovieStore extends EventEmitter {
   }
 
   getMovies = (query) => {
-    const url = 'https://api.themoviedb.org/3/search/movie';
+    const url = Config.apiEntryPoint+'search/movie';
     const config = {
       params: {
         api_key: Config.apiKey,
