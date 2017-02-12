@@ -22,7 +22,7 @@ export default class MovieCard extends React.Component {
   }
 
   setMoviePoster = (endUrl) => {
-    return 'http://image.tmdb.org/t/p/w185/'+endUrl;
+    return !!endUrl ? 'http://image.tmdb.org/t/p/w185/'+endUrl : false;
   }
 
   searchValueChange = (e) => {

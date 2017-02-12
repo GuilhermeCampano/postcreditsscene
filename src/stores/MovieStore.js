@@ -2,6 +2,7 @@ import {EventEmitter} from 'events';
 import Axios from 'axios';
 import Dispatcher from '../modules/dispatcher';
 import * as Utils  from '../modules/utils';
+import * as Config from '../modules/config';
 
 class MovieStore extends EventEmitter {
   constructor() {
@@ -27,37 +28,26 @@ class MovieStore extends EventEmitter {
   }
 
   getMovies = (query) => {
-    let url = 'https://api.themoviedb.org/3/search/movie';
-    let apiKey = '?api_key=10c95faa22afc9b0a480f4f77cd3a6d1';
-    let params = '&query='+query;
-    let completeUrl = url+apiKey+params;
+    const url = 'https://api.themoviedb.org/3/search/movie';
+    const config = {
+      params: {
+        api_key: Config.apiKey,
+        query: query,
+      }
+    };
     if(!query) {
       return false;
     }
-    Utils.makeRequest('GET', completeUrl)
-    .then( (response) => {
-      let parsedResponse = JSON.parse(response);
-      this.movies = parsedResponse.results;
+    Axios.get(url,config)
+    .then((response) => {
+      this.movies = response.data.results;
       this.emit('change');
       return true;
     })
-    .catch( (err) => {
-      console.log(err);
+    .catch((error) =>{
+      console.log(error);
+      return false;
     });
-    // let config = {
-    //   params: {
-    //     api_key: '10c95faa22afc9b0a480f4f77cd3a6d1',
-    //     query: query,
-    //     callback:'test'
-    //   }
-    // };
-    //
-    // Axios.get(url,config)
-    // .then((response) => {
-    //   self.movies = response.data.results;
-    //   self.emit("change");
-    // })
-    // .catch((error) =>{});
   }
 
   getAll() {

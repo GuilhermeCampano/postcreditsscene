@@ -6,5 +6,17 @@ nav ul a { color: $font-color-menu;}
 .cardImage {
   height: 240px;
   margin: auto;
-  width: auto!important;;
+  width: auto!important;
+  &:before {
+    content: "We are not found an image for this movie";
+    display: block;
+    margin-bottom: 10px;
+    height: 100%;
+    background: #c7c7c7
+  }
+  &:after {
+    content: "(url: " attr(src) ")";
+    display: block;
+    font-size: 12px;
+  }
 }
