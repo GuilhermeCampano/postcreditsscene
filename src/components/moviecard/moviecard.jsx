@@ -11,10 +11,13 @@ export default class MovieCard extends React.Component {
       searchValue: ''
     }
   }
-  
+
   componentWillMount () {
-    MovieStore.on('change', ()=>{
-      this.state({data:MovieStore.getAll()});
+    MovieStore.on('change', () => {
+      let moviesData = MovieStore.getAll()
+      if(!!moviesData && moviesData.length){
+        this.setState({data:moviesData});
+      }
     })
   }
 
@@ -24,7 +27,7 @@ export default class MovieCard extends React.Component {
 
   searchValueChange = (e) => {
     this.setState({searchValue:e.target.value});
-    MovieActions.getMovies("bla");
+    MovieActions.getMovies(this.state.searchValue);
   }
 
   render() {

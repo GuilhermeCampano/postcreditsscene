@@ -1,4 +1,4 @@
-import Dispatcher from '../dispatcher';
+import Dispatcher from '../modules/dispatcher';
 
 export function getMovies (query) {
   Dispatcher.dispatch({
