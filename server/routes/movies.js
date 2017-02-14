@@ -30,8 +30,8 @@ exports.register = function(server, options, next) {
 		path: '/movies/{id}',
 		handler: function(request, reply) {
 
-			db.movies.findOne({
-				_id: request.params.id
+			db.movies.find({
+				"moviedbid": parseInt(request.params.id)
 			}, (err, doc) => {
 
 				if (err) {
@@ -42,7 +42,7 @@ exports.register = function(server, options, next) {
 					return reply(Boom.notFound());
 				}
 
-				reply(doc);
+				reply(doc[0]);
 			});
 
 		}
@@ -53,19 +53,25 @@ exports.register = function(server, options, next) {
 		path: '/movies',
 		handler: function(request, reply) {
 
-			const book = request.payload;
+			const movie = request.payload;
 
 			//Create an id
-			book._id = uuid.v1();
+			movie._id = uuid.v1();
 
-			db.movies.save(book, (err, result) => {
-
-				if (err) {
-					return reply(Boom.wrap(err, 'Internal MongoDB error'));
+			db.movies.find({
+				"moviedbid": parseInt(request.payload.moviedbid) || null
+			}, (err, doc) => {
+				if (doc.length) {
+					return reply('Movie already created');
 				}
-
-				reply(book);
+				db.movies.save(movie, (err, result) => {
+					if (err) {
+						return reply(Boom.wrap(err, 'Internal MongoDB error'));
+					}
+					reply(movie);
+				});
 			});
+
 		},
 		config: {
 			validate: {
@@ -104,7 +110,7 @@ exports.register = function(server, options, next) {
 				}
 
 				reply().code(204);
-			});
+			}, {upsert: true});
 		},
 		config: {
 			validate: {
@@ -115,8 +121,8 @@ exports.register = function(server, options, next) {
 					release_date: Joi.string(),
 					poster_path: Joi.string().min(10).max(250),
 					post_credits: {
-						yes: Joi.number().integer(),
-						no: Joi.number().integer()
+						yes: Joi.number().integer().min(0).default(0),
+						no: Joi.number().integer().min(0).default(0)
 					}
 				}).required().min(1)
 			}
