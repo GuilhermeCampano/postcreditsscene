@@ -10,11 +10,11 @@ server.connection({
 });
 
 // Connect to db
-server.app.db = mongojs('hapi-rest-mongo', ['books']);
+server.app.db = mongojs('hapi-rest-mongo', ['movies']);
 
 //Load plugins and start server
 server.register([
-  require('./routes/books')
+  require('./routes/movies')
 ], (err) => {
   if (err) {
     throw err;
