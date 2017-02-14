@@ -50,6 +50,25 @@ exports.register = function(server, options, next) {
 
 	server.route({
 		method: 'POST',
+		path: '/movies/filter',
+		handler: function(request, reply) {
+			db.movies.find({
+				"moviedbid": {$in: request.payload.movie_ids}
+			}, (err, doc) => {
+				if (err) {
+					return reply(Boom.wrap(err, 'Internal MongoDB error'));
+				}
+				if (!doc) {
+					return reply(Boom.notFound());
+				}
+				reply(doc);
+			});
+
+		}
+	});
+
+	server.route({
+		method: 'POST',
 		path: '/movies',
 		handler: function(request, reply) {
 
