@@ -21,8 +21,12 @@ class MovieStore extends EventEmitter {
     }
   }
 
+
   getMovies = (query) => {
-    const url = Config.apiEntryPoint+'search/movie';
+    let moviesApiResponse = [];
+    let postCreditsApiResponse = [];
+    let movieIds = [];
+    const url = Config.moviesAPI+'search/movie';
     const config = {
       params: {
         api_key: Config.apiKey,
@@ -32,9 +36,18 @@ class MovieStore extends EventEmitter {
     if(!query) {
       return false;
     }
-    Axios.get(url,config)
+
+    Axios.get(url,config) // Get Movies
     .then((response) => {
-      this.movies = response.data.results;
+      moviesApiResponse = response.data.results;
+      movieIds= this.getMovieIds(moviesApiResponse);
+      return Axios.post(Config.postCreditsAPI+'movies/filter',{
+        movie_ids: movieIds
+      });
+    })
+    .then((response) => { // Get postcredits
+      postCreditsApiResponse = response.data;
+      this.movies = this.mergeApiResponses(moviesApiResponse,postCreditsApiResponse);
       this.emit('change');
       return true;
     })
@@ -46,6 +59,28 @@ class MovieStore extends EventEmitter {
 
   getAll() {
     return this.movies;
+  }
+
+  getMovieIds = (moviesList) => {
+    let movieIds = [];
+    if(moviesList.length){
+      for (let movie of moviesList)  {
+        movieIds.push(movie.id);
+      };
+    }
+    return movieIds;
+  }
+
+  mergeApiResponses = (list1, list2) => {
+    for(let list1Item of list1) {
+      for(let list2Item of list2) {
+        if(list1Item.id == list2Item.moviedbid){
+          list1Item = Object.assign(list1Item, list2Item);
+          break;
+        }
+      }
+    }
+    return list1;
   }
 
 }

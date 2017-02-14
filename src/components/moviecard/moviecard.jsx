@@ -27,7 +27,7 @@ export default class MovieCard extends React.Component {
   }
 
   setMoviePoster = (endUrl) => {
-    return !!endUrl ? 'http://image.tmdb.org/t/p/w185/'+endUrl : false;
+    return !!endUrl ? 'http://image.tmdb.org/t/p/w185'+endUrl : false;
   }
 
   handleSearchValueChange = (e) => {
@@ -49,6 +49,14 @@ export default class MovieCard extends React.Component {
     return MovieActions.getMovies(searchValue);
   }
 
+  setVoteCounter = (postCredits, key) => {
+    if(postCredits && postCredits[key]){
+      return postCredits[key];
+    } else {
+      return '-';
+    }
+  }
+
   render() {
     let self = this;
     let movies = this.state.data.map(function(movie) {
@@ -60,6 +68,10 @@ export default class MovieCard extends React.Component {
               <span className="card-title">{movie.title}</span>
             </div>
             <div className="card-content">
+              <p>
+              <strong>YES:</strong>{self.setVoteCounter(movie.post_credits,'yes')}
+              <strong>NO:</strong>{self.setVoteCounter(movie.post_credits,'no')}
+              </p>
               <p>{movie.overview}</p>
             </div>
           </div>
