@@ -1,15 +1,15 @@
 {
   "name": "PostCreditsScene",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Post-credits scene",
   "main": "''",
   "scripts": {
     "build": "webpack --config webpack.production.config.js --progress --profile --colors",
     "start": "webpack-dev-server --progress --profile --colors --content-base",
     "lint": "eslint --ext js --ext jsx src || exit 0",
-    "preserver":"start mongod --dbpath ./server/data",
+    "preserver": "start mongod --dbpath ./server/data",
     "server": "node server/server.js",
-    "start-mongo":"mongod"
+    "start-mongo": "mongod"
   },
   "repository": {
     "type": "git",
