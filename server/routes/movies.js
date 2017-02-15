@@ -8,6 +8,7 @@ exports.register = function(server, options, next) {
 
 	const db = server.app.db;
 
+	// GET movies
 	server.route({
 		method: 'GET',
 		path: '/movies',
@@ -25,6 +26,7 @@ exports.register = function(server, options, next) {
 		}
 	});
 
+	// GET movies/{id}
 	server.route({
 		method: 'GET',
 		path: '/movies/{id}',
@@ -48,12 +50,15 @@ exports.register = function(server, options, next) {
 		}
 	});
 
+	// POST movies/filter
 	server.route({
 		method: 'POST',
 		path: '/movies/filter',
 		handler: function(request, reply) {
 			db.movies.find({
-				"moviedbid": {$in: request.payload.movie_ids}
+				"moviedbid": {
+					$in: request.payload.movie_ids
+				}
 			}, (err, doc) => {
 				if (err) {
 					return reply(Boom.wrap(err, 'Internal MongoDB error'));
@@ -67,6 +72,7 @@ exports.register = function(server, options, next) {
 		}
 	});
 
+	// POST movies
 	server.route({
 		method: 'POST',
 		path: '/movies',
@@ -109,6 +115,37 @@ exports.register = function(server, options, next) {
 		}
 	});
 
+	// PATCH movies/{id}/poll
+	server.route({
+		method: 'PATCH',
+		path: '/movies/{id}/poll',
+		handler: function(request, reply) {
+			db.movies.update({
+				_id: request.params.id
+			}, {
+				$set: {
+					$inc: {
+						post_credits: {
+							yes: request.payload.post_credits.yes,
+							no: request.payload.post_credits.no
+						}
+					}
+				}
+			}, function(err, result) {
+
+				if (err) {
+					return reply(Boom.wrap(err, 'Internal MongoDB error'));
+				}
+
+				if (result.n === 0) {
+					return reply(Boom.notFound());
+				}
+				reply(movie);
+			});
+		}
+	});
+
+	// PATCH movies/{id}
 	server.route({
 		method: 'PATCH',
 		path: '/movies/{id}',
@@ -129,7 +166,9 @@ exports.register = function(server, options, next) {
 				}
 
 				reply().code(204);
-			}, {upsert: true});
+			}, {
+				upsert: true
+			});
 		},
 		config: {
 			validate: {
@@ -148,6 +187,7 @@ exports.register = function(server, options, next) {
 		}
 	});
 
+	// DELETE movies/{id}
 	server.route({
 		method: 'DELETE',
 		path: '/movies/{id}',
