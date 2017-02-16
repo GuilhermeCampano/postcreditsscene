@@ -67,20 +67,21 @@ export default class MovieCard extends React.Component {
   }
 
   render() {
-    let movies = this.state.data.map(function(movie) {
+    let self = this;
+    let movies = this.state.data.map((movie) => {
       return (
         <div className="col s12 m6" key={movie.id}>
           <div className="card medium">
             <div className="card-image">
-              <img className={style.cardImage} src={() => this.setMoviePoster(movie.poster_path)}/>
+              <img className={style.cardImage} src={this.setMoviePoster(movie.poster_path)}/>
               <span className="card-title">{movie.title}</span>
             </div>
             <div className="card-content">
               <p>
               <strong onClick={() => this.handleVoteClick(event,movie.id,'yes')}>YES:</strong>
-                {() => this.setVoteCounter(movie.post_credits,'yes')}
+                {this.setVoteCounter(movie.post_credits,'yes')}
               <strong onClick={() => this.handleVoteClick(event,movie.id,'no')}>NO:</strong>
-                {() => this.setVoteCounter(movie.post_credits,'no')}
+                {this.setVoteCounter(movie.post_credits,'no')}
               </p>
               <p>{movie.overview}</p>
             </div>
@@ -93,7 +94,7 @@ export default class MovieCard extends React.Component {
       <div>
         <div className="input-field col s6">
           <i className={"material-icons prefix "+ style.searchButton}
-            onClick= {this.handleClickSearchButton}
+            onClick= {() => this.handleClickSearchButton}
           >search</i>
           <input
             id = "serch-movie"
