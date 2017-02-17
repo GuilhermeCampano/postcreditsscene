@@ -16,17 +16,27 @@ class MovieStore extends EventEmitter {
       case "GET_MOVIES":
         this.getMovies(action.value);
         break;
+      case "VOTE_POLL":
+        this.patchMovie(action.value);
+        break;
       default:
         break;
     }
   }
 
-
+  patchMovie = (moviePayload) => {
+    if(!moviePayload) {
+      return false;
+    }
+    return Axios.patch(Config.postCreditsAPI+'movies',moviePayload)
+    .then((response) =>{
+      
+    }}
+  }
   getMovies = (query) => {
     let moviesApiResponse = [];
     let postCreditsApiResponse = [];
     let movieIds = [];
-    const url = Config.moviesAPI+'search/movie';
     const config = {
       params: {
         api_key: Config.apiKey,
@@ -36,8 +46,7 @@ class MovieStore extends EventEmitter {
     if(!query) {
       return false;
     }
-
-    Axios.get(url,config) // Get Movies
+    Axios.get(Config.moviesAPI+'search/movie',config) // Get Movies
     .then((response) => {
       moviesApiResponse = response.data.results;
       movieIds= this.getMovieIds(moviesApiResponse);

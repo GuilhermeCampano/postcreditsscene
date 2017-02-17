@@ -55,40 +55,41 @@ exports.register = function(server, options, next) {
 		method: 'POST',
 		path: '/movies',
 		handler: function(request, reply) {
-
-			const movie = request.payload;
-
-			//Create an id
-			movie._id = uuid.v1();
-
-			db.movies.find({
-				"id": parseInt(request.payload.id) || null
-			}, (err, doc) => {
-				if (doc.length) {
-					return reply('Movie already created');
+			let movies = request.payload;
+			for (let movie of movies) {
+				movie._id = movie.id;
+			}
+			db.movies.insert(movies, (err, result) => {
+				if (err) {
+					return reply(Boom.wrap(err, 'Internal MongoDB error'));
 				}
-				db.movies.save(movie, (err, result) => {
-					if (err) {
-						return reply(Boom.wrap(err, 'Internal MongoDB error'));
-					}
-					reply(movie);
-				});
-			});
-
+				reply(movies);
+			},
+			{upsert: true}
+			);
 		},
 		config: {
 			validate: {
-				payload: {
+				payload: Joi.array().items(Joi.object({
 					id: Joi.number().integer(),
+					"adult": Joi.boolean(),
+				  "genre_ids": Joi.array(),
+					"original_language": Joi.string(),
+					"title": Joi.string(),
+					"backdrop_path": Joi.any(),
+					"popularity": Joi.number(),
+					"vote_count": Joi.number(),
+					"video": Joi.boolean(),
+					"vote_average": Joi.number(),
 					original_title: Joi.string().min(1).max(50).required(),
-					overview: Joi.string().min(1).required(),
+					overview: Joi.string().allow('').optional(),
 					release_date: Joi.string(),
-					poster_path: Joi.string().min(10).max(250),
+					poster_path: Joi.any(),
 					post_credits: {
 						yes: Joi.number().integer(),
 						no: Joi.number().integer()
 					}
-				}
+				}))
 			}
 		}
 	});
@@ -150,84 +151,103 @@ exports.register = function(server, options, next) {
 		method: 'PATCH',
 		path: '/movies/{id}',
 		handler: function(request, reply) {
-			db.movies.update({
-				"id": parseInt(request.params.id)
-			}, {
-				$set: request.payload
-			}, function(err, result) {
-
-				if (err) {
-					return reply(Boom.wrap(err, 'Internal MongoDB error'));
+			db.movies.find({
+				"id": {
+					$in: request.params.id
 				}
-
-				if (result.n === 0) {
-					return reply(Boom.notFound());
+			}, (err, movie) => {
+				if(movie){
+					request.payload.post_credits.yes = movie.post_credits.yes + request.payload.post_credits.yes;
+	 				request.payload.post_credits.yes = movie.post_credits.no + request.payload.post_credits.no;
+				} else {
+					request.payload._id = request.payload.id
 				}
-
-				reply('Updated').code(204);
-			}, {
-				upsert: true
+				db.movies.update({
+					"id": parseInt(request.payload.id)
+				}, {
+					$set: request.payload
+				}, function(err, result) {
+					if (err) {
+						return reply(Boom.wrap(err, 'Internal MongoDB error'));
+					}
+					if (result.n === 0) {
+						return reply(Boom.notFound());
+					}
+					reply('Updated').code(204);
+				}, {
+					upsert: true
+				});
+				reply(movie);
 			});
 		},
 		config: {
 			validate: {
 				payload: Joi.object({
 					id: Joi.number().integer(),
-					original_title: Joi.string().min(1).max(50),
-					overview: Joi.string().min(1),
+					adult: Joi.boolean(),
+				  genre_ids: Joi.array(),
+					original_language: Joi.string(),
+					title: Joi.string(),
+					backdrop_path: Joi.any(),
+					popularity: Joi.number(),
+					vote_count: Joi.number(),
+					video: Joi.boolean(),
+					vote_average: Joi.number(),
+					original_title: Joi.string().min(1).max(50).required(),
+					overview: Joi.string().allow('').optional(),
 					release_date: Joi.string(),
-					poster_path: Joi.string().min(10).max(250),
+					poster_path: Joi.any(),
 					post_credits: {
-						yes: Joi.number().integer().min(0).default(0),
-						no: Joi.number().integer().min(0).default(0)
+						yes: Joi.number().integer().default(0),
+						no: Joi.number().integer().default(0)
 					}
 				}).required().min(1)
 			}
 		}
 	});
 
-	server.route({
-		method: 'POST',
-		path: '/movies/{id}/poll',
-		handler: function(request, reply) {
-			let yesIncrementValue = 0;
-			let noIncrementValue = 0;
-			switch (request.payload.vote_type) {
-				case 'YES':
-					yesIncrementValue++;
-					break;
-				case 'CHANGE_TO_YES':
-					yesIncrementValue++;
-					noIncrementValue--;
-					break;
-				case 'NO':
-					noIncrementValue++;
-					break;
-				case 'CHANGE_TO_NO':
-					yesIncrementValue--;
-					noIncrementValue++;
-					break;
-				default:
-					break;
-			}
-			console.log(yesIncrementValue,noIncrementValue);
-			db.movies.update(
-				{"id": parseInt(request.params.id)},
-				{ $set: {
-					"post_credits": { "yes": yesIncrementValue, "no": noIncrementValue }
-				}},
-				function(err, result) {
-				if (err) {
-					return reply(Boom.wrap(err, 'Internal MongoDB error'));
-				}
-				if (result.n === 0) {
-					return reply(Boom.notFound());
-				}
-				reply('Updated').code(204);
-				}
-			);
-		}
-	});
+	// server.route({
+	// 	method: 'POST',
+	// 	path: '/movies/{id}/poll',
+	// 	handler: function(request, reply) {
+	// 		let yesIncrementValue = 0;
+	// 		let noIncrementValue = 0;
+	// 		switch (request.payload.vote_type) {
+	// 			case 'YES':
+	// 				yesIncrementValue++;
+	// 				break;
+	// 			case 'CHANGE_TO_YES':
+	// 				yesIncrementValue++;
+	// 				noIncrementValue--;
+	// 				break;
+	// 			case 'NO':
+	// 				noIncrementValue++;
+	// 				break;
+	// 			case 'CHANGE_TO_NO':
+	// 				yesIncrementValue--;
+	// 				noIncrementValue++;
+	// 				break;
+	// 			default:
+	// 				break;
+	// 		}
+	// 		console.log(yesIncrementValue,noIncrementValue);
+	// 		db.movies.update(
+	// 			{"id": parseInt(request.params.id)},
+	// 			{ $set: {
+	// 				"post_credits": { "yes": yesIncrementValue, "no": noIncrementValue }
+	// 			}},
+	// 			function(err, result) {
+	// 			if (err) {
+	// 				return reply(Boom.wrap(err, 'Internal MongoDB error'));
+	// 			}
+	// 			if (result.n === 0) {
+	// 				return reply(Boom.notFound());
+	// 			}
+	// 			reply('Updated').code(204);
+	// 			}
+	// 		);
+	// 	}
+	// });
 
 	// DELETE movies/{id}
 	// server.route({

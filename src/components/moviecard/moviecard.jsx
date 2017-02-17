@@ -57,9 +57,18 @@ export default class MovieCard extends React.Component {
     }
   }
 
-  handleVoteClick = (event, movieId, voteType) => {
+  handleVoteClick = (event, movie, voteType) => {
     event.preventDefault();
-    return MovieActions.votePoll(movieId, voteType);
+    switch (voteType) {
+      case 'YES':
+        movie.post_credits.yes = 1;
+        break;
+      case 'NO':
+        movie.post_credits.no = 1;
+        break;
+      default:
+    }
+    return MovieActions.votePoll(movie);
   }
 
   render() {
@@ -73,9 +82,9 @@ export default class MovieCard extends React.Component {
             </div>
             <div className="card-content">
               <p>
-              <strong onClick={() => this.handleVoteClick(event,movie.id,'YES')}>YES:</strong>
+              <strong onClick={() => this.handleVoteClick(event,movie,'YES')}>YES:</strong>
                 {this.setVoteCounter(movie.post_credits,'yes')}
-              <strong onClick={() => this.handleVoteClick(event,movie.id,'NO')}>NO:</strong>
+              <strong onClick={() => this.handleVoteClick(event,movie,'NO')}>NO:</strong>
                 {this.setVoteCounter(movie.post_credits,'no')}
               </p>
               <p>{movie.overview}</p>
