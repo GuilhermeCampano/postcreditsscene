@@ -41,12 +41,10 @@ class MovieStore extends EventEmitter {
     .then((response) => {
       moviesApiResponse = response.data.results;
       movieIds= this.getMovieIds(moviesApiResponse);
-      return Axios.post(Config.postCreditsAPI+'movies/filter',{
-        movie_ids: movieIds
-      });
+      return Axios.post(Config.postCreditsAPI+'movies/filter',{ movie_ids: movieIds});
     })
-    .then((response) => { // Get postcredits
-      postCreditsApiResponse = response.data;
+    .then((postMoviesFilterResponse) => {
+      postCreditsApiResponse = postMoviesFilterResponse.data;
       this.movies = this.mergeApiResponses(moviesApiResponse,postCreditsApiResponse);
       this.emit('change');
       return true;
@@ -74,7 +72,7 @@ class MovieStore extends EventEmitter {
   mergeApiResponses = (list1, list2) => {
     for(let list1Item of list1) {
       for(let list2Item of list2) {
-        if(list1Item.id == list2Item.moviedbid){
+        if(list1Item.id == list2Item.id){
           list1Item = Object.assign(list1Item, list2Item);
           break;
         }

@@ -79,7 +79,7 @@ exports.register = function(server, options, next) {
 		config: {
 			validate: {
 				payload: {
-					moviedbid: Joi.number().integer(),
+					id: Joi.number().integer(),
 					original_title: Joi.string().min(1).max(50).required(),
 					overview: Joi.string().min(1).required(),
 					release_date: Joi.string(),
@@ -172,7 +172,7 @@ exports.register = function(server, options, next) {
 		config: {
 			validate: {
 				payload: Joi.object({
-					moviedbid: Joi.number().integer(),
+					id: Joi.number().integer(),
 					original_title: Joi.string().min(1).max(50),
 					overview: Joi.string().min(1),
 					release_date: Joi.string(),
@@ -213,7 +213,7 @@ exports.register = function(server, options, next) {
 			console.log(yesIncrementValue,noIncrementValue);
 			db.movies.update(
 				{"id": parseInt(request.params.id)},
-				{ $set: { 
+				{ $set: {
 					"post_credits": { "yes": yesIncrementValue, "no": noIncrementValue }
 				}},
 				function(err, result) {
