@@ -59,15 +59,10 @@ export default class MovieCard extends React.Component {
 
   handleVoteClick = (event, movieId, voteType) => {
     event.preventDefault();
-    let postCredits = {
-      yes: voteType === 'yes'? 1 : 0,
-      no: voteType === 'no'? 1 : 0
-    }
-    return MovieActions.patchPoll(movieId, postCredits);
+    return MovieActions.votePoll(movieId, voteType);
   }
 
   render() {
-    let self = this;
     let movies = this.state.data.map((movie) => {
       return (
         <div className="col s12 m6" key={movie.id}>
@@ -78,9 +73,9 @@ export default class MovieCard extends React.Component {
             </div>
             <div className="card-content">
               <p>
-              <strong onClick={() => this.handleVoteClick(event,movie.id,'yes')}>YES:</strong>
+              <strong onClick={() => this.handleVoteClick(event,movie.id,'YES')}>YES:</strong>
                 {this.setVoteCounter(movie.post_credits,'yes')}
-              <strong onClick={() => this.handleVoteClick(event,movie.id,'no')}>NO:</strong>
+              <strong onClick={() => this.handleVoteClick(event,movie.id,'NO')}>NO:</strong>
                 {this.setVoteCounter(movie.post_credits,'no')}
               </p>
               <p>{movie.overview}</p>

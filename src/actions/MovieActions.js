@@ -7,13 +7,12 @@ export function getMovies (query) {
   })
 }
 
-export function patchPoll (movieId, postCredits) {
-  console.log(movieId, postCredits)
+export function votePoll (movieId, voteType) {
   Dispatcher.dispatch({
-    type:"GET_MOVIES",
+    type:"VOTE_POLL",
     value:{
-      movieId,
-      postCredits
+      id: movieId,
+      vote_type: voteType
     }
   })
 }

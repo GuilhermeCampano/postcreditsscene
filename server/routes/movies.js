@@ -33,7 +33,7 @@ exports.register = function(server, options, next) {
 		handler: function(request, reply) {
 
 			db.movies.find({
-				"moviedbid": parseInt(request.params.id)
+				"id": parseInt(request.params.id)
 			}, (err, doc) => {
 
 				if (err) {
@@ -45,28 +45,6 @@ exports.register = function(server, options, next) {
 				}
 
 				reply(doc[0]);
-			});
-
-		}
-	});
-
-	// POST movies/filter
-	server.route({
-		method: 'POST',
-		path: '/movies/filter',
-		handler: function(request, reply) {
-			db.movies.find({
-				"moviedbid": {
-					$in: request.payload.movie_ids
-				}
-			}, (err, doc) => {
-				if (err) {
-					return reply(Boom.wrap(err, 'Internal MongoDB error'));
-				}
-				if (!doc) {
-					return reply(Boom.notFound());
-				}
-				reply(doc);
 			});
 
 		}
@@ -84,7 +62,7 @@ exports.register = function(server, options, next) {
 			movie._id = uuid.v1();
 
 			db.movies.find({
-				"moviedbid": parseInt(request.payload.moviedbid) || null
+				"id": parseInt(request.payload.id) || null
 			}, (err, doc) => {
 				if (doc.length) {
 					return reply('Movie already created');
@@ -115,33 +93,55 @@ exports.register = function(server, options, next) {
 		}
 	});
 
-	// PATCH movies/{id}/poll
-	server.route({
-		method: 'PATCH',
-		path: '/movies/{id}/poll',
-		handler: function(request, reply) {
-			db.movies.update({
-				_id: request.params.id
-			}, {
-				$set: {
-					$inc: {
-						post_credits: {
-							yes: request.payload.post_credits.yes,
-							no: request.payload.post_credits.no
-						}
-					}
-				}
-			}, function(err, result) {
+	// // PATCH movies/{id}/poll
+	// server.route({
+	// 	method: 'PATCH',
+	// 	path: '/movies/{id}/poll',
+	// 	handler: function(request, reply) {
+	// 		db.movies.update({
+	// 			_id: request.params.id
+	// 		}, {
+	// 			$set: {
+	// 				$inc: {
+	// 					post_credits: {
+	// 						yes: request.payload.post_credits.yes,
+	// 						no: request.payload.post_credits.no
+	// 					}
+	// 				}
+	// 			}
+	// 		}, function(err, result) {
+	//
+	// 			if (err) {
+	// 				return reply(Boom.wrap(err, 'Internal MongoDB error'));
+	// 			}
+	//
+	// 			if (result.n === 0) {
+	// 				return reply(Boom.notFound());
+	// 			}
+	// 			reply(movie);
+	// 		});
+	// 	}
+	// });
 
+	// POST movies/filter
+	server.route({
+		method: 'POST',
+		path: '/movies/filter',
+		handler: function(request, reply) {
+			db.movies.find({
+				"id": {
+					$in: request.payload.movie_ids
+				}
+			}, (err, doc) => {
 				if (err) {
 					return reply(Boom.wrap(err, 'Internal MongoDB error'));
 				}
-
-				if (result.n === 0) {
+				if (!doc) {
 					return reply(Boom.notFound());
 				}
-				reply(movie);
+				reply(doc);
 			});
+
 		}
 	});
 
@@ -150,9 +150,8 @@ exports.register = function(server, options, next) {
 		method: 'PATCH',
 		path: '/movies/{id}',
 		handler: function(request, reply) {
-
 			db.movies.update({
-				_id: request.params.id
+				"id": parseInt(request.params.id)
 			}, {
 				$set: request.payload
 			}, function(err, result) {
@@ -165,7 +164,7 @@ exports.register = function(server, options, next) {
 					return reply(Boom.notFound());
 				}
 
-				reply().code(204);
+				reply('Updated').code(204);
 			}, {
 				upsert: true
 			});
@@ -187,28 +186,71 @@ exports.register = function(server, options, next) {
 		}
 	});
 
-	// DELETE movies/{id}
 	server.route({
-		method: 'DELETE',
-		path: '/movies/{id}',
+		method: 'POST',
+		path: '/movies/{id}/poll',
 		handler: function(request, reply) {
-
-			db.movies.remove({
-				_id: request.params.id
-			}, function(err, result) {
-
+			let yesIncrementValue = 0;
+			let noIncrementValue = 0;
+			switch (request.payload.vote_type) {
+				case 'YES':
+					yesIncrementValue++;
+					break;
+				case 'CHANGE_TO_YES':
+					yesIncrementValue++;
+					noIncrementValue--;
+					break;
+				case 'NO':
+					noIncrementValue++;
+					break;
+				case 'CHANGE_TO_NO':
+					yesIncrementValue--;
+					noIncrementValue++;
+					break;
+				default:
+					break;
+			}
+			console.log(yesIncrementValue,noIncrementValue);
+			db.movies.update(
+				{"id": parseInt(request.params.id)},
+				{ $set: { 
+					"post_credits": { "yes": yesIncrementValue, "no": noIncrementValue }
+				}},
+				function(err, result) {
 				if (err) {
 					return reply(Boom.wrap(err, 'Internal MongoDB error'));
 				}
-
 				if (result.n === 0) {
 					return reply(Boom.notFound());
 				}
-
-				reply().code(204);
-			});
+				reply('Updated').code(204);
+				}
+			);
 		}
 	});
+
+	// DELETE movies/{id}
+	// server.route({
+	// 	method: 'DELETE',
+	// 	path: '/movies/{id}',
+	// 	handler: function(request, reply) {
+	//
+	// 		db.movies.remove({
+	// 			_id: request.params.id
+	// 		}, function(err, result) {
+	//
+	// 			if (err) {
+	// 				return reply(Boom.wrap(err, 'Internal MongoDB error'));
+	// 			}
+	//
+	// 			if (result.n === 0) {
+	// 				return reply(Boom.notFound());
+	// 			}
+	//
+	// 			reply().code(204);
+	// 		});
+	// 	}
+	// });
 
 	return next();
 };
