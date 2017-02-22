@@ -59,6 +59,10 @@ export default class MovieCard extends React.Component {
 
   handleVoteClick = (event, movie, voteType) => {
     event.preventDefault();
+    movie.post_credits = {
+      no:0,
+      yes:0
+    }
     switch (voteType) {
       case 'YES':
         movie.post_credits.yes = 1;

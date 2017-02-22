@@ -28,10 +28,15 @@ class MovieStore extends EventEmitter {
     if(!moviePayload) {
       return false;
     }
-    return Axios.patch(Config.postCreditsAPI+'movies',moviePayload)
+    return Axios.post(Config.postCreditsAPI+'movies',[moviePayload])
     .then((response) =>{
-      
-    }}
+      console.log(response);
+      return true;
+    })
+    .catch((error) =>{
+      console.log(error);
+      return false;
+    });
   }
   getMovies = (query) => {
     let moviesApiResponse = [];
@@ -55,6 +60,9 @@ class MovieStore extends EventEmitter {
     .then((postMoviesFilterResponse) => {
       postCreditsApiResponse = postMoviesFilterResponse.data;
       this.movies = this.mergeApiResponses(moviesApiResponse,postCreditsApiResponse);
+      return Axios.post(Config.postCreditsAPI+'movies', this.movies);
+    })
+    .then((response) => {
       this.emit('change');
       return true;
     })
