@@ -20,7 +20,20 @@ exports.register = function(server, options, next) {
 					return reply(Boom.wrap(err, 'Internal MongoDB error'));
 				}
 
-				reply(docs);
+				db.movies.update(docs, (err, result) => {
+					for(doc of docs){
+						doc._id = doc.id;
+					}
+					if (err) {
+						return reply(Boom.wrap(err, 'Internal MongoDB error'));
+					}
+					reply(docs);
+				},
+				{
+					upsert:true,
+					multi:true
+				});
+
 			});
 
 		}
@@ -55,22 +68,18 @@ exports.register = function(server, options, next) {
 		method: 'POST',
 		path: '/movies',
 		handler: function(request, reply) {
-			let movies = request.payload;
-			for (let movie of movies) {
-				movie._id = movie.id;
-			}
-			db.movies.insert(movies, (err, result) => {
+			let movie = request.payload;
+			movie._id = movie.id;
+			db.movies.insert(movie, (err, result) => {
 				if (err) {
 					return reply(Boom.wrap(err, 'Internal MongoDB error'));
 				}
-				reply(movies);
-			},
-			{upsert: true}
-			);
+				reply(movie);
+			});
 		},
 		config: {
 			validate: {
-				payload: Joi.array().items(Joi.object({
+				payload: Joi.object({
 					id: Joi.number().integer(),
 					"adult": Joi.boolean(),
 				  "genre_ids": Joi.array(),
@@ -81,48 +90,18 @@ exports.register = function(server, options, next) {
 					"vote_count": Joi.number(),
 					"video": Joi.boolean(),
 					"vote_average": Joi.number(),
-					original_title: Joi.string().min(1).max(50).required(),
+					original_title: Joi.string().min(1).required(),
 					overview: Joi.string().allow('').optional(),
-					release_date: Joi.string(),
+					release_date: Joi.string().allow(''),
 					poster_path: Joi.any(),
 					post_credits: {
 						yes: Joi.number().integer(),
 						no: Joi.number().integer()
 					}
-				}))
+				})
 			}
 		}
 	});
-
-	// // PATCH movies/{id}/poll
-	// server.route({
-	// 	method: 'PATCH',
-	// 	path: '/movies/{id}/poll',
-	// 	handler: function(request, reply) {
-	// 		db.movies.update({
-	// 			_id: request.params.id
-	// 		}, {
-	// 			$set: {
-	// 				$inc: {
-	// 					post_credits: {
-	// 						yes: request.payload.post_credits.yes,
-	// 						no: request.payload.post_credits.no
-	// 					}
-	// 				}
-	// 			}
-	// 		}, function(err, result) {
-	//
-	// 			if (err) {
-	// 				return reply(Boom.wrap(err, 'Internal MongoDB error'));
-	// 			}
-	//
-	// 			if (result.n === 0) {
-	// 				return reply(Boom.notFound());
-	// 			}
-	// 			reply(movie);
-	// 		});
-	// 	}
-	// });
 
 	// POST movies/filter
 	server.route({
@@ -205,72 +184,6 @@ exports.register = function(server, options, next) {
 			}
 		}
 	});
-
-	// server.route({
-	// 	method: 'POST',
-	// 	path: '/movies/{id}/poll',
-	// 	handler: function(request, reply) {
-	// 		let yesIncrementValue = 0;
-	// 		let noIncrementValue = 0;
-	// 		switch (request.payload.vote_type) {
-	// 			case 'YES':
-	// 				yesIncrementValue++;
-	// 				break;
-	// 			case 'CHANGE_TO_YES':
-	// 				yesIncrementValue++;
-	// 				noIncrementValue--;
-	// 				break;
-	// 			case 'NO':
-	// 				noIncrementValue++;
-	// 				break;
-	// 			case 'CHANGE_TO_NO':
-	// 				yesIncrementValue--;
-	// 				noIncrementValue++;
-	// 				break;
-	// 			default:
-	// 				break;
-	// 		}
-	// 		console.log(yesIncrementValue,noIncrementValue);
-	// 		db.movies.update(
-	// 			{"id": parseInt(request.params.id)},
-	// 			{ $set: {
-	// 				"post_credits": { "yes": yesIncrementValue, "no": noIncrementValue }
-	// 			}},
-	// 			function(err, result) {
-	// 			if (err) {
-	// 				return reply(Boom.wrap(err, 'Internal MongoDB error'));
-	// 			}
-	// 			if (result.n === 0) {
-	// 				return reply(Boom.notFound());
-	// 			}
-	// 			reply('Updated').code(204);
-	// 			}
-	// 		);
-	// 	}
-	// });
-
-	// DELETE movies/{id}
-	// server.route({
-	// 	method: 'DELETE',
-	// 	path: '/movies/{id}',
-	// 	handler: function(request, reply) {
-	//
-	// 		db.movies.remove({
-	// 			_id: request.params.id
-	// 		}, function(err, result) {
-	//
-	// 			if (err) {
-	// 				return reply(Boom.wrap(err, 'Internal MongoDB error'));
-	// 			}
-	//
-	// 			if (result.n === 0) {
-	// 				return reply(Boom.notFound());
-	// 			}
-	//
-	// 			reply().code(204);
-	// 		});
-	// 	}
-	// });
 
 	return next();
 };
