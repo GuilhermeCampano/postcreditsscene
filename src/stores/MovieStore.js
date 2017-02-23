@@ -17,25 +17,26 @@ class MovieStore extends EventEmitter {
         this.getMovies(action.value);
         break;
       case "VOTE_POLL":
-        this.postMovie(action.value);
+        this.insertOrUpdateMovie(action.value);
         break;
       default:
         break;
     }
   }
 
-  postMovie = (moviePayload) => {
+  insertOrUpdateMovie = (moviePayload) => {
     if(!moviePayload) {
       return false;
     }
     return Axios.post(Config.postCreditsAPI+'movies/'+moviePayload.id, moviePayload)
     .then((response) =>{
-      this.movies = this.mergeApiResponses(this.movies,[response.data]);
-      console.log(this.movies);
+      const movie = response.data;
+      this.movies = this.mergeApiResponses(this.movies,[movie]);
       this.emit('change');
       return true;
     })
     .catch((error) =>{
+      console.log(error);
       return false;
     });
   }

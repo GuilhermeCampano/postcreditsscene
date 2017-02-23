@@ -75,18 +75,14 @@ exports.register = function(server, options, next) {
 		method: 'POST',
 		path: '/movies/{id}',
 		handler: function(request, reply) {
+			console.log('================');
 			let movie = request.payload;
-			if (movie._id) {
-				delete movie.post_credits;
-				delete movie._id;
-			};
+				console.log(movie);
 			db.movies.update({
-					"id": request.payload.id
+					_id: request.payload.id
 				}, {
 					$setOnInsert: {
-						_id: movie.id
-					},
-					$set: {
+						'id':movie.id,
 						'title': movie.title,
 						'original_title': movie.original_title,
 						'original_language': movie.original_language,
@@ -107,14 +103,14 @@ exports.register = function(server, options, next) {
 						return reply(Boom.wrap(err, 'Internal MongoDB error'));
 					}
 					db.movies.find({
-						"id": parseInt(request.params.id)
+						"_id": movie.id
 					}, (err, movies) => {
 
 						if (err) {
 							return reply(Boom.wrap(err, 'Internal MongoDB error'));
 						}
 
-						if (!doc) {
+						if (!movies) {
 							return reply(Boom.notFound());
 						}
 
@@ -126,6 +122,7 @@ exports.register = function(server, options, next) {
 		config: {
 			validate: {
 				payload: Joi.object({
+					_id: Joi.number().integer(),
 					id: Joi.number().integer(),
 					adult: Joi.boolean(),
 					genre_ids: Joi.array(),
