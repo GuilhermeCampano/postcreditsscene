@@ -28,7 +28,7 @@ class MovieStore extends EventEmitter {
     if(!moviePayload) {
       return false;
     }
-    return Axios.post(Config.postCreditsAPI+'movies',moviePayload)
+    return Axios.post(Config.postCreditsAPI+'movies/'+moviePayload.id, moviePayload)
     .then((response) =>{
       console.log(response);
       return true;
