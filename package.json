@@ -5,7 +5,7 @@
   "main": "''",
   "scripts": {
     "build": "webpack --config webpack.production.config.js --progress --profile --colors",
-    "start": "webpack-dev-server --progress --profile --colors --content-base",
+    "start": "webpack-dev-server --hot --progress --profile --colors --content-base",
     "lint": "eslint --ext js --ext jsx src || exit 0",
     "database": "mkdir -p server/data && mongod --dbpath ./server/data",
     "server": "node server/server.js",

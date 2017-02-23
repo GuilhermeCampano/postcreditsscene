@@ -24,3 +24,13 @@ nav ul a { color: $font-color-menu;}
 .searchButton{
   cursor: pointer;
 }
+
+.voteButton{
+  cursor: pointer;
+  &.yes{
+    color:green
+  }
+  &.no{
+    color:red
+  }
+}

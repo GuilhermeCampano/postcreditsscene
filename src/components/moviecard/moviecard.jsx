@@ -86,9 +86,9 @@ export default class MovieCard extends React.Component {
             </div>
             <div className="card-content">
               <p>
-              <strong onClick={() => this.handleVoteClick(event,movie,'YES')}>YES:</strong>
+              <strong className={style.voteButton} onClick={() => this.handleVoteClick(event,movie,'YES')}>YES:</strong>
                 {this.setVoteCounter(movie.post_credits,'yes')}
-              <strong onClick={() => this.handleVoteClick(event,movie,'NO')}>NO:</strong>
+              <strong className={style.voteButton} onClick={() => this.handleVoteClick(event,movie,'NO')}>NO:</strong>
                 {this.setVoteCounter(movie.post_credits,'no')}
               </p>
               <p>{movie.overview}</p>
