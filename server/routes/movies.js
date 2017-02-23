@@ -76,23 +76,50 @@ exports.register = function(server, options, next) {
 		path: '/movies/{id}',
 		handler: function(request, reply) {
 			let movie = request.payload;
-			movie._id = movie.id;
-			db.movies.update(
-				{_id: request.payload.id},
-				{
-					$set: movie,
-					// $inc: {
-					// 	'post_credits.yes': movie.post_credits.yes,
-					// 	'post_credits.no': movie.post_credits.no
-					// }
+			if (movie._id) {
+				delete movie.post_credits;
+				delete movie._id;
+			};
+			db.movies.update({
+					"id": request.payload.id
+				}, {
+					$setOnInsert: {
+						_id: movie.id
+					},
+					$set: {
+						'title': movie.title,
+						'original_title': movie.original_title,
+						'original_language': movie.original_language,
+						'popularity': movie.popularity,
+						'overview': movie.overview,
+						'release_date': movie.release_date,
+						'poster_path': movie.poster_path
+					},
+					$inc: {
+						'post_credits.yes': movie.post_credits.yes,
+						'post_credits.no': movie.post_credits.no
+					}
+				}, {
+					upsert: true
 				},
-				{upsert: true},
-				(err,result) => {
-					console.log(result);
+				(err, result) => {
 					if (err) {
 						return reply(Boom.wrap(err, 'Internal MongoDB error'));
 					}
-					reply(movie).code(200);
+					db.movies.find({
+						"id": parseInt(request.params.id)
+					}, (err, movies) => {
+
+						if (err) {
+							return reply(Boom.wrap(err, 'Internal MongoDB error'));
+						}
+
+						if (!doc) {
+							return reply(Boom.notFound());
+						}
+
+						reply(movies[0]);
+					});
 				}
 			);
 		},
@@ -101,7 +128,7 @@ exports.register = function(server, options, next) {
 				payload: Joi.object({
 					id: Joi.number().integer(),
 					adult: Joi.boolean(),
-				  genre_ids: Joi.array(),
+					genre_ids: Joi.array(),
 					original_language: Joi.string(),
 					title: Joi.string(),
 					backdrop_path: Joi.any(),
