@@ -75,9 +75,7 @@ exports.register = function(server, options, next) {
 		method: 'POST',
 		path: '/movies/{id}',
 		handler: function(request, reply) {
-			console.log('================');
 			let movie = request.payload;
-				console.log(movie);
 			db.movies.update({
 					_id: request.payload.id
 				}, {
