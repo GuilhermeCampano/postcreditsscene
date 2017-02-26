@@ -1,6 +1,7 @@
 import {EventEmitter} from 'events';
 import Axios from 'axios';
 import Dispatcher from '../modules/dispatcher';
+import {VotePollStore} from './VotePollStore';
 import * as Utils  from '../modules/utils';
 import * as Config from '../modules/config';
 
@@ -28,6 +29,11 @@ class MovieStore extends EventEmitter {
     if(!moviePayload) {
       return false;
     }
+    let voteType = this.parseVoteType(moviePayload.post_credits);
+    if(!voteType || !VotePollStore.setMovie(moviePayload.id,voteType)){
+      return false;
+    }
+
     return Axios.post(Config.postCreditsAPI+'movies/'+moviePayload.id, moviePayload)
     .then((response) =>{
       const movie = response.data;
@@ -40,6 +46,17 @@ class MovieStore extends EventEmitter {
       return false;
     });
   }
+
+  parseVoteType (postCredits) {
+    if(!!postCredits.yes){
+      return 'YES';
+    } else if (!!postCredits.no){
+      return 'NO'
+    } else {
+      return false;
+    }
+  }
+
   getMovies = (query) => {
     let moviesApiResponse = [];
     let postCreditsApiResponse = [];
