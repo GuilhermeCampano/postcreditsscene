@@ -28,13 +28,13 @@ class votePollStore {
     const movie = this.getById(id);
     if( !movie || _.isEmpty(movie) ){ //If the user not voted for this movie yet
       this.createVotePollItem(id,voteType);
-      return true;
+      return voteType == 'YES' ? 'CREATE_YES': 'CREATE_NO';
     } else {
       if( movie.type == voteType.toUpperCase() ){ //Does't allow the same votetype
         return false;
       } else {
         this.updateVotePollItem(id,voteType); // Changes vote type
-        return true;
+        return voteType == 'YES' ? 'CHANGE_TO_YES': 'CHANGE_TO_NO';
       }
     }
     localStorage.setItem('votePoll',JSON.stringify(this.votePoll));
@@ -42,7 +42,6 @@ class votePollStore {
   }
 
   createVotePollItem(id,voteType) {
-    console.log('creating a new item');
     this.votePoll.push({
       id:parseInt(id),
       type:voteType.toUpperCase(),
@@ -52,7 +51,6 @@ class votePollStore {
   }
 
   updateVotePollItem(id,voteType) {
-    console.log('updating an item');
     const index = this.getIndexById(id);
     this.votePoll[index].type = voteType.toUpperCase();
     this.votePoll[index].date = new Date().getTime();

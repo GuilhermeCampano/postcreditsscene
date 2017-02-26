@@ -10,6 +10,6 @@ export function getMovies (query) {
 export function votePoll (movie, voteType) {
   Dispatcher.dispatch({
     type:"VOTE_POLL",
-    value: movie
+    value: { movie, voteType }
   })
 }
