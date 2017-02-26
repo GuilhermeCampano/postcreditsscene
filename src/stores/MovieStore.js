@@ -1,11 +1,7 @@
-import {
-	EventEmitter
-} from 'events';
+import {EventEmitter} from 'events';
 import Axios from 'axios';
 import Dispatcher from '../modules/dispatcher';
-import {
-	VotePollStore
-} from './VotePollStore';
+import {VotePollStore} from './VotePollStore';
 import * as Utils from '../modules/utils';
 import * as Config from '../modules/config';
 
